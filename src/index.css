@@ -1,0 +1,29 @@
+*,
+::after,
+::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: all 0.1s ease-in-out;
+}
+
+html {
+    /* font-size: 62.5%; */
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    text-rendering: geometricPrecision;
+    /* background-color: #121212; */
+}
+
+.site {
+    font-family: 'Nunito Sans', 'Courier New', Courier, monospace;
+    /* font-size: 1.6rem; */
+    max-width: 1200px;
+    padding: 0 2rem;
+    margin: 0 auto;
+    color: #fff;
+}
+
+a{
+    text-decoration: none;
+}
