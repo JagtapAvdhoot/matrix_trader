@@ -10,6 +10,7 @@ import Footer from './components/Footer/Footer';
 function App() {
   return (
     <Box width='full' background='black'>
+      
       <div className="site">
 
         <Header />
