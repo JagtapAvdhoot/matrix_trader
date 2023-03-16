@@ -101,12 +101,13 @@ const Policy = () => {
 
                     </Text>
                     <Text>
-
+                        Cancellation & Refund Policy
+                        No cancellations & Refunds are entertained
                     </Text>
                     <Text>
 
                     </Text>
-                    
+
                 </Flex>
             </Box>
         </>
