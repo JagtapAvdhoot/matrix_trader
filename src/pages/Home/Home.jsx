@@ -1,46 +1,73 @@
 // const Header = () => {}
 import { Box, Text, Heading, UnorderedList, ListItem, Card, CardBody, CardFooter, CardHeader, Flex, Button } from '@chakra-ui/react';
 import { loadStripe } from '@stripe/stripe-js';
+import useRazorpay from 'react-razorpay';
 import { matrixPlans } from '../../data/plans';
-// import {} from 'axios';
+import axios from 'axios';
 
 import './Home.css'
 
 
 const Home = () => {
     // console.log(process.env.REACT_APP_STRIPE_PUBLISH_KEY)
-    const makePayment = async (product) => {
+    const Razorpay = useRazorpay();
+
+    const createOrder = async (plan) => {
         try {
-            // console.log('stripe')
-            const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLISH_KEY);
-            // console.log(stripe, 'stripe')
-            const body = { product };
-            const headers = {
-                "Content-Type": "application/json",
-            };
+            const response = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/order/create`, {
+                palnId: plan.id
+            })
+            console.log('response', response)
+            if (response.data) {
 
-            const response = await fetch(
-                `${process.env.REACT_APP_SERVER_URL}/api/v1/create-checkout`,
-                {
-                    method: "POST",
-                    headers: headers,
-                    body: JSON.stringify(body),
-                }
-            );
-
-            const session = await response.json();
-            console.log(session, 'session')
-            const result = stripe.redirectToCheckout({
-                sessionId: session.id,
-            });
-
-            if (result.error) {
-                console.log(result.error);
+                return response.data;
             }
+            return false;
         } catch (error) {
-            console.log(error)
+            return false
         }
+    }
 
+    const handlePayment = async (params) => {
+        const order = await createOrder(params); //  Create order on your backend
+
+        const options = {
+            key: process.env.REACT_APP_RAZOR_PAY_ID, // Enter the Key ID generated from the Dashboard
+            amount: params.price * 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            currency: "INR",
+            image: "https://example.com/your_logo",
+            order_id: order?.id, //This is a sample Order ID. Pass the `id` obtained in the response of createOrder().
+            handler: function (response) {
+                alert(response.razorpay_payment_id);
+                alert(response.razorpay_order_id);
+                alert(response.razorpay_signature);
+            },
+            prefill: {
+                name: "Piyush Garg",
+                email: "youremail@example.com",
+                contact: "9999999999",
+            },
+            notes: {
+                address: "Razorpay Corporate Office",
+            },
+            theme: {
+                color: "#3399cc",
+            },
+        };
+
+        const rzp1 = new Razorpay(options);
+
+        rzp1.on("payment.failed", function (response) {
+            alert(response.error.code);
+            alert(response.error.description);
+            alert(response.error.source);
+            alert(response.error.step);
+            alert(response.error.reason);
+            alert(response.error.metadata.order_id);
+            alert(response.error.metadata.payment_id);
+        });
+
+        rzp1.open();
     };
 
     return (
@@ -146,7 +173,7 @@ const Home = () => {
                                                 </Flex>
                                             </Box>
                                         </Flex>
-                                        <Button marginTop={5} width='full' onClick={() => makePayment(plan.id)} background='whatsapp.400' _hover={{ background: 'whatsapp.600' }} color='whiteAlpha.900'>Enroll</Button>
+                                        <Button marginTop={5} width='full' onClick={() => handlePayment(plan)} background='whatsapp.400' _hover={{ background: 'whatsapp.600' }} color='whiteAlpha.900'>Enroll</Button>
                                     </CardHeader>
                                 </Card>
                             ))
