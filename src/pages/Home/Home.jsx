@@ -3,6 +3,7 @@ import { Box, Text, Heading, UnorderedList, ListItem, Card, CardBody, CardFooter
 import { loadStripe } from '@stripe/stripe-js';
 import useRazorpay from 'react-razorpay';
 import { matrixPlans } from '../../data/plans';
+import logo from '../../assets/logo.jpg'
 import axios from 'axios';
 
 import './Home.css'
@@ -19,7 +20,6 @@ const Home = () => {
             })
             console.log('response', response)
             if (response.data) {
-
                 return response.data;
             }
             return false;
@@ -30,41 +30,37 @@ const Home = () => {
 
     const handlePayment = async (params) => {
         const order = await createOrder(params); //  Create order on your backend
-
+        console.log('order', order, params)
         const options = {
             key: process.env.REACT_APP_RAZOR_PAY_ID, // Enter the Key ID generated from the Dashboard
-            amount: params.price * 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            amount: 100,// params.price * 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             currency: "INR",
-            image: "https://example.com/your_logo",
+            image: logo,
             order_id: order?.id, //This is a sample Order ID. Pass the `id` obtained in the response of createOrder().
-            handler: function (response) {
-                alert(response.razorpay_payment_id);
-                alert(response.razorpay_order_id);
-                alert(response.razorpay_signature);
+            handler: async function (response) {
+                try {
+                    const { status } = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/order/verify`, response)
+                    if (status === 200) {
+                        alert('payment successfull')
+                        return;
+                    } else {
+                        alert('payment failed')
+                        return;
+                    }
+                } catch (error) {
+                    alert('payment failed')
+                }
             },
-            prefill: {
-                name: "Piyush Garg",
-                email: "youremail@example.com",
-                contact: "9999999999",
-            },
-            notes: {
-                address: "Razorpay Corporate Office",
-            },
+            outterHeight: '500px',
             theme: {
-                color: "#3399cc",
+                color: "#444444",
             },
         };
 
-        const rzp1 = new Razorpay(options);
+        const rzp1 = new window.Razorpay(options);
 
         rzp1.on("payment.failed", function (response) {
-            alert(response.error.code);
-            alert(response.error.description);
-            alert(response.error.source);
-            alert(response.error.step);
             alert(response.error.reason);
-            alert(response.error.metadata.order_id);
-            alert(response.error.metadata.payment_id);
         });
 
         rzp1.open();

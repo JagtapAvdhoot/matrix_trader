@@ -105,7 +105,7 @@ const Policy = () => {
                         No cancellations & Refunds are entertained
                     </Text>
                     <Text>
-
+                        Shipment is not applicable
                     </Text>
 
                 </Flex>
